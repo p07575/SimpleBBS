@@ -4,7 +4,6 @@ import keyboard
 import time
 from colorama import Fore
 import socket
-import threading
 
 #定義變量
 cons = "0"
@@ -15,7 +14,7 @@ class connServer:
         self.connect = False
         self.host = ""
         self.port = 0
-        self.pw = ""
+        self.username = ""
 
 #面向對象（服務器類）
 sc = connServer()
@@ -84,6 +83,7 @@ def mprint():
 def ConnectServer():
     while True:
         sc.host = input("請輸入服務器的域名或IP地址以連接服務器>>> ")
+        sc.username = input("請輸入用戶名（不用註冊）>>> ")
         while True:
             try:
                 sc.port = int(input("請輸入服務器的端口以連接服務器>>> ")) # server's port
@@ -132,7 +132,7 @@ def sm():
                 break
             else:
                 content=content+c1+"\n"
-        post(title,"Anonymous",content)
+        post(title,sc.username,content)
         print("發表成功！！！")
         time.sleep(1)
     else:
