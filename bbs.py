@@ -83,13 +83,13 @@ def mprint():
 def ConnectServer():
     while True:
         sc.host = input("請輸入服務器的域名或IP地址以連接服務器>>> ")
-        sc.username = input("請輸入用戶名（不用註冊）>>> ")
         while True:
             try:
                 sc.port = int(input("請輸入服務器的端口以連接服務器>>> ")) # server's port
                 global client
                 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 client.connect((sc.host, sc.port))
+                sc.username = input("請輸入用戶名（不用註冊）>>> ")
                 sc.connect = True
                 break
             except:
