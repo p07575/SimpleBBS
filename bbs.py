@@ -49,35 +49,6 @@ def menu():
     print("|                                                              |")
     print("|4) 退出軟件                                                   |")
     print("----------------------------------------------------------------")
-    if __name__ == '__main__':
-        keyboard.add_hotkey('1', ConnectServer)
-        keyboard.add_hotkey('2', sm)
-        keyboard.add_hotkey('3', get_post)
-        keyboard.add_hotkey('4', sysexit)
-        keyboard.add_hotkey('esc', menu)
-        keyboard.add_hotkey('ctrl+c', sysexit)
-        keyboard.wait('ctrl+c')
-
-#定義主菜單（無鍵盤識別功能）功能
-def mprint():
-    os.system("cls")
-    print("----------------------------------------------------------------")
-    print("|                           簡易論壇                           |")
-    if sc.connect == False:
-        print("| 服務器連接狀態： "+ Fore.RED + "未連接" + Fore.RESET +"      聯繫作者：contact@p07575.eu.org |")
-    elif sc.connect == True:
-        print("| 服務器連接狀態： "+ Fore.GREEN + "已連接" + Fore.RESET +"      聯繫作者：contact@p07575.eu.org |")
-    print("|                                                              |")
-    print("| 功能：                                                       |")
-    print("|                                                              |")
-    print("|1) 連接服務器                                                 |")
-    print("|                                                              |")
-    print("|2) 發表帖子                                                   |")
-    print("|                                                              |")
-    print("|3) 查看帖子                                                   |")
-    print("|                                                              |")
-    print("|4) 退出軟件                                                   |")
-    print("----------------------------------------------------------------")
 
 #定義連接服務器功能
 def ConnectServer():
@@ -97,7 +68,7 @@ def ConnectServer():
                 break
         if sc.connect == True:
             break
-    mprint()
+    menu()
 
 #定義發送帖子功能
 def post(title,name,content):
@@ -114,11 +85,11 @@ def get_post():
         message = client.recv(1024000).decode("UTF-8")
         print(message)
         os.system("pause")
-        mprint()
+        menu()
     else:
         print("請先連接服務器再查看帖子！！！")
         time.sleep(1)
-    mprint()
+    menu()
 
 #定義輸入帖子功能
 def sm():
@@ -138,8 +109,16 @@ def sm():
     else:
         print("請先連接服務器再發表帖子！！！")
         time.sleep(1)
-    mprint()
+    menu()
 
 #打開菜單
 menu()
+if __name__ == '__main__':
+    keyboard.add_hotkey('1', ConnectServer)
+    keyboard.add_hotkey('2', sm)
+    keyboard.add_hotkey('3', get_post)
+    keyboard.add_hotkey('4', sysexit)
+    keyboard.add_hotkey('esc', menu)
+    keyboard.add_hotkey('ctrl+c', sysexit)
+    keyboard.wait('ctrl+c')
 os.system("pause")
