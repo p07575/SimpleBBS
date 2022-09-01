@@ -15,6 +15,14 @@ server.listen()
 clients = []
 
 # Sending Messages To All Connected Clients
+def check():
+    try:
+        with open("posts.json", "r") as p:
+            data = json.load(p)
+    except:
+        with open("posts.json", "w") as p:
+            json.dump([],p)
+    
 def send_data(message,client):
     client.send(message.encode("UTF-8"))
 
@@ -29,6 +37,8 @@ def get_posts():
     posts=""
     with open("posts.json", "r") as p:
         data = json.load(p)
+    if data == []:
+        return "本服務器暫時沒有任何帖子！！！"
     for d in data:
         posts=posts+(f'標題：{d["title"]}       由 {d["name"]} 發表 \n\n{d["content"]}\n----------------------------------------------------------------\n')
     return posts
@@ -65,5 +75,7 @@ def receive():
         # Start Handling Thread For Client
         thread = threading.Thread(target=handle, args=(client,))
         thread.start()
+
+check()
 
 receive()
