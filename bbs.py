@@ -5,9 +5,6 @@ import time
 from colorama import Fore
 import socket
 
-#定義變量
-cons = "0"
-
 #定義連接服務器類
 class connServer:
     def __init__(self):
