@@ -1,4 +1,4 @@
-# SimpleBBS Install Guide
+# SimpleDiary Server Install Guide
 ### 1) Edit server.py
 >### Change the ip address in line 6 to your own lan ip .
 >```python
