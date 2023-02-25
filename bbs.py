@@ -31,7 +31,7 @@ def sysexit():
 def menu():
     os.system("cls")
     print("----------------------------------------------------------------")
-    print("|                           簡易論壇                           |")
+    print("|                           簡易日記                           |")
     if sc.connect == False:
         print("| 服務器連接狀態： "+ Fore.RED + "未連接" + Fore.RESET +"      聯繫作者：contact@p07575.eu.org |")
     elif sc.connect == True:
@@ -63,10 +63,11 @@ def ConnectServer():
                 break
             sc.username = input("請輸入用戶名>>> ")
             sc.password = input("請輸入密碼>>> ")
-            client.send(f"{sc.username}%0|%0{sc.password}")
+            client.send(f"{sc.username}%0|%0{sc.password}".encode("UTF-*"))
             log = client.recv(1024000).decode("UTF-8")
             if log=="T":
                 sc.connect = True
+                break
             else:
                 print("用戶名或密碼出錯,請重新輸入！")
                 break
@@ -115,12 +116,15 @@ def sm():
         time.sleep(1)
     menu()
 
+def gp():
+    get_post(sc.username)
+
 #打開菜單
 menu()
 if __name__ == '__main__':
     keyboard.add_hotkey('1', ConnectServer)
     keyboard.add_hotkey('2', sm)
-    keyboard.add_hotkey('3', get_post(sc.username))
+    keyboard.add_hotkey('3', gp)
     keyboard.add_hotkey('4', sysexit)
     keyboard.add_hotkey('esc', menu)
     keyboard.add_hotkey('ctrl+c', sysexit)
