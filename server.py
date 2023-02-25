@@ -55,7 +55,7 @@ def get_posts(name):
         return "本服務器暫時沒有任何帖子！！！"
     da = data[name]
     for d in da:
-        posts=posts+(f'標題：{d["title"]}       由 {d["name"]} 發表 \n\n{d["content"]}\n----------------------------------------------------------------\n')
+        posts=posts+(f'標題：{d["title"]}       由 {d["name"]} 發表於 {d["date"]} {d["time"]} \n\n{d["content"]}\n----------------------------------------------------------------\n')
     return posts
 
 # Handling Messages From Clients

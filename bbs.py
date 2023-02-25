@@ -20,12 +20,10 @@ sc = connServer()
 #定義退出函數
 def sysexit():
     os.system("cls")
-    print("感謝使用簡易論壇！")
-    print("Bye!")
+    print("感謝使用簡易日記！")
+    print("Bye!\n")
+    os.system("pause")
     exit = os._exit(os.X_OK)
-    if sc.connect == True:
-        client.close()
-    return exit 
 
 #定義主菜單功能
 def menu():
