@@ -12,6 +12,7 @@ class connServer:
         self.host = ""
         self.port = 0
         self.username = ""
+        self.password = ""
 
 #面向對象（服務器類）
 sc = connServer()
@@ -40,9 +41,9 @@ def menu():
     print("|                                                              |")
     print("|1) 連接服務器                                                 |")
     print("|                                                              |")
-    print("|2) 發表帖子                                                   |")
+    print("|2) 撰寫日記                                                   |")
     print("|                                                              |")
-    print("|3) 查看帖子                                                   |")
+    print("|3) 查看日記                                                   |")
     print("|                                                              |")
     print("|4) 退出軟件                                                   |")
     print("----------------------------------------------------------------")
@@ -57,11 +58,17 @@ def ConnectServer():
                 global client
                 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 client.connect((sc.host, sc.port))
-                sc.username = input("請輸入用戶名（不用註冊）>>> ")
-                sc.connect = True
-                break
             except:
-                print("這不是一個有效的端口，請重新輸入！")
+                print("這不是一個有效的端口,請重新輸入！")
+                break
+            sc.username = input("請輸入用戶名>>> ")
+            sc.password = input("請輸入密碼>>> ")
+            client.send(f"{sc.username}%0|%0{sc.password}")
+            log = client.recv(1024000).decode("UTF-8")
+            if log=="T":
+                sc.connect = True
+            else:
+                print("用戶名或密碼出錯,請重新輸入！")
                 break
         if sc.connect == True:
             break
@@ -74,11 +81,11 @@ def post(title,name,content):
     client.send(post_content.encode("UTF-8"))
 
 #定義顯示帖子功能
-def get_post():
+def get_post(name):
     if sc.connect == True:
         global client
         os.system("cls")
-        client.send("get".encode("UTF-8"))
+        client.send(f"get/uSB/{name}".encode("UTF-8"))
         message = client.recv(1024000).decode("UTF-8")
         print(message)
         os.system("pause")
@@ -113,7 +120,7 @@ menu()
 if __name__ == '__main__':
     keyboard.add_hotkey('1', ConnectServer)
     keyboard.add_hotkey('2', sm)
-    keyboard.add_hotkey('3', get_post)
+    keyboard.add_hotkey('3', get_post(sc.username))
     keyboard.add_hotkey('4', sysexit)
     keyboard.add_hotkey('esc', menu)
     keyboard.add_hotkey('ctrl+c', sysexit)
