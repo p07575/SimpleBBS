@@ -1,6 +1,8 @@
 import socket
 import threading
 import json
+import sessionKey as sK
+import string
 from datetime import datetime
 
 # Open server.cfg
@@ -18,6 +20,9 @@ server.listen()
 
 # Lists For Clients and Their Nicknames
 clients = []
+CliKey = {}
+Cli = {}
+Keys = []
 
 # Sending Messages To All Connected Clients
 def check():
@@ -68,19 +73,32 @@ def handle(client):
             if "%0|%0" in message_from_user:
                 message_from_user = message_from_user.split("%0|%0")
                 if login(message_from_user[0],message_from_user[1]):
-                    client.send("T".encode("UTF-8"))
+                    while True:
+                        key = sK.GenPasswd2(8,string.digits) + sK.GenPasswd2(15,string.ascii_letters)
+                        if key not in Keys:
+                            break
+                    CliKey[key]=[message_from_user[0],address]
+                    Cli[address]=key
+                    Keys.append(key)
+                    client.send(f"T/{key}".encode("UTF-8"))
                 else:
                     client.send("F".encode("UTF-8"))
 
             elif "|jasonishandsome|"in message_from_user:
                 message_from_user = message_from_user.split("|jasonishandsome|")
-                save_posts(message_from_user[0],message_from_user[1],message_from_user[2])
+                if CliKey[message_from_user[3]][0] == message_from_user[1]:
+                    save_posts(message_from_user[0],message_from_user[1],message_from_user[2])
             elif "get" in message_from_user:
                 message_from_user = message_from_user.split("/uSB/")
-                send_data(get_posts(message_from_user[1]),client)
+                if CliKey[message_from_user[1]][0] == message_from_user[2]:
+                    send_data(get_posts(message_from_user[1]),client)
+
         except:
             # Removing And Closing Clients
             clients.remove(client)
+            Keys.remove(Cli[address])
+            del CliKey[Cli[address]]
+            del Cli[address]
             client.close()
             print(f"{str(address)} left!")
             break

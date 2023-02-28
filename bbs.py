@@ -13,6 +13,7 @@ class connServer:
         self.port = 0
         self.username = ""
         self.password = ""
+        self.sessionKey = ""
 
 #面向對象（服務器類）
 sc = connServer()
@@ -63,8 +64,11 @@ def ConnectServer():
             sc.password = input("請輸入密碼>>> ")
             client.send(f"{sc.username}%0|%0{sc.password}".encode("UTF-*"))
             log = client.recv(1024000).decode("UTF-8")
-            if log=="T":
+            if "T" in log:
                 sc.connect = True
+                sc.sessionKey = log.split("/")[1]
+                print(sc.sessionKey)
+                os.system("pause")
                 break
             else:
                 print("用戶名或密碼出錯,請重新輸入！")
@@ -76,7 +80,7 @@ def ConnectServer():
 #定義發送帖子功能
 def post(title,name,content):
     global client
-    post_content=f"{title}|jasonishandsome|{name}|jasonishandsome|{content}"
+    post_content=f"{title}|jasonishandsome|{name}|jasonishandsome|{content}|jasonishandsome|{sc.sessionKey}"
     client.send(post_content.encode("UTF-8"))
 
 #定義顯示帖子功能
@@ -84,7 +88,7 @@ def get_post(name):
     if sc.connect == True:
         global client
         os.system("cls")
-        client.send(f"get/uSB/{name}".encode("UTF-8"))
+        client.send(f"get/uSB/{name}/uSB/{sc.sessionKey}".encode("UTF-8"))
         message = client.recv(1024000).decode("UTF-8")
         print(message)
         os.system("pause")
