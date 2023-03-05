@@ -3,6 +3,7 @@ import threading
 import json
 import sessionKey as sK
 import string
+import rsa
 from datetime import datetime
 
 # Open server.cfg
@@ -22,7 +23,12 @@ server.listen()
 clients = []
 CliKey = {}
 Cli = {}
+Rsa = {}
 Keys = []
+
+def get_rsa():
+    with open ("rsa_public_key.pem", "rb") as r:
+        return r.read()
 
 # Sending Messages To All Connected Clients
 def check():
@@ -66,39 +72,50 @@ def get_posts(name):
 # Handling Messages From Clients
 def handle(client):
     while True:
+        # print(clients,"\n",CliKey,"\n",Cli,"\n",Keys,"\n","\n")
         try:
             # Broadcasting Messages
             global message_from_user
             message_from_user = client.recv(1024).decode("UTF-8")
             if "%0|%0" in message_from_user:
                 message_from_user = message_from_user.split("%0|%0")
-                if login(message_from_user[0],message_from_user[1]):
-                    while True:
-                        key = sK.GenPasswd2(8,string.digits) + sK.GenPasswd2(15,string.ascii_letters)
-                        if key not in Keys:
-                            break
-                    CliKey[key]=[message_from_user[0],address]
-                    Cli[address]=key
-                    Keys.append(key)
-                    client.send(f"T/{key}".encode("UTF-8"))
-                else:
-                    client.send("F".encode("UTF-8"))
-
+                sig = message_from_user[1]
+                message_from_user = rsa.decrypt_data(message_from_user[0])
+                if rsa.rsa_public_check_sign(message_from_user, sig):
+                    message_from_user = message_from_user.split("%0|%0")
+                    if login(message_from_user[0],message_from_user[1]):
+                        while True:
+                            key = sK.GenPasswd2(8,string.digits) + sK.GenPasswd2(15,string.ascii_letters)
+                            if key not in Keys:
+                                break
+                        CliKey[key]=[message_from_user[0],address[0]]
+                        Cli[address[0]]=key
+                        # print(message_from_user[2])
+                        Keys.append(key)
+                        client.send(f"T/{key}".encode("UTF-8"))
+                    else:
+                        client.send("F".encode("UTF-8"))
+            elif "rsa" in message_from_user:
+                message_from_user = message_from_user.split("rsa/")
+                Rsa[address[0]]=message_from_user[0]
+                client.send(get_rsa())
             elif "|jasonishandsome|"in message_from_user:
                 message_from_user = message_from_user.split("|jasonishandsome|")
                 if CliKey[message_from_user[3]][0] == message_from_user[1]:
                     save_posts(message_from_user[0],message_from_user[1],message_from_user[2])
             elif "get" in message_from_user:
                 message_from_user = message_from_user.split("/uSB/")
-                if CliKey[message_from_user[1]][0] == message_from_user[2]:
+                # print(f"{CliKey[message_from_user[2]][0]} / {message_from_user[1]} is using function get_post.")
+                if CliKey[message_from_user[2]][0] == message_from_user[1]:
+                    # print("True")
                     send_data(get_posts(message_from_user[1]),client)
 
         except:
             # Removing And Closing Clients
             clients.remove(client)
-            Keys.remove(Cli[address])
-            del CliKey[Cli[address]]
-            del Cli[address]
+            Keys.remove(Cli[address[0]])
+            del CliKey[Cli[address[0]]]
+            del Cli[address[0]]
             client.close()
             print(f"{str(address)} left!")
             break
@@ -117,6 +134,10 @@ def receive():
         # Start Handling Thread For Client
         thread = threading.Thread(target=handle, args=(client,))
         thread.start()
+
+        # print(clients,"\n",CliKey,"\n",Cli,"\n",Keys,"\n","\n")
+
+rsa.gen_key()
 
 check()
 

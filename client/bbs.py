@@ -4,6 +4,11 @@ import keyboard
 import time
 from colorama import Fore
 import socket
+import rsa
+
+def get_rsa():
+    with open ("rsa_public_key.pem", "r") as r:
+        return r.read()
 
 #定義連接服務器類
 class connServer:
@@ -62,13 +67,18 @@ def ConnectServer():
                 break
             sc.username = input("請輸入用戶名>>> ")
             sc.password = input("請輸入密碼>>> ")
-            client.send(f"{sc.username}%0|%0{sc.password}".encode("UTF-*"))
+            client.send(f"rsa/{get_rsa()}".encode("UTF-8"))
+            rs = client.recv(1024000)
+            with open ("rsa_public_key.pem", "wb") as r:
+                r.write(rs)
+            data = f"{sc.username}%0|%0{sc.password}%0|%0{get_rsa()}"    
+            client.send((rsa.encrypt_data(data)+"%0|%0"+rsa.rsa_private_sign(data)).encode("UTF-8"))
             log = client.recv(1024000).decode("UTF-8")
             if "T" in log:
                 sc.connect = True
                 sc.sessionKey = log.split("/")[1]
-                print(sc.sessionKey)
-                os.system("pause")
+                # print(sc.sessionKey)
+                # os.system("pause")
                 break
             else:
                 print("用戶名或密碼出錯,請重新輸入！")
@@ -120,6 +130,8 @@ def sm():
 
 def gp():
     get_post(sc.username)
+
+rsa.gen_key()
 
 #打開菜單
 menu()
