@@ -71,18 +71,26 @@ def ConnectServer():
             rs = client.recv(1024000)
             with open ("rsa_public_key.pem", "wb") as r:
                 r.write(rs)
-            data = f"{sc.username}%0|%0{sc.password}%0|%0{get_rsa()}"    
+            data = f"{sc.username}%0|%0{sc.password}"
+            # print(data)
+            # print((rsa.encrypt_data(data)+"%0|%0"+rsa.rsa_private_sign(data)))
             client.send((rsa.encrypt_data(data)+"%0|%0"+rsa.rsa_private_sign(data)).encode("UTF-8"))
-            log = client.recv(1024000).decode("UTF-8")
-            if "T" in log:
-                sc.connect = True
-                sc.sessionKey = log.split("/")[1]
-                # print(sc.sessionKey)
-                # os.system("pause")
-                break
-            else:
-                print("用戶名或密碼出錯,請重新輸入！")
-                break
+            log = client.recv(1024).decode("UTF-8") #Cannot receve data yet
+            # log = log.split("%0|%0")
+            print(log)#[0]+"\n\n\n\n"+log[1])
+            d = rsa.decrypt_data(log[0])
+            print(d+"\n\n"+log[0])
+            if rsa.rsa_public_check_sign(d,log[1]):
+                log = d
+                if "T" in log:
+                    sc.connect = True
+                    sc.sessionKey = log.split("/")[1]
+                    # print(sc.sessionKey)
+                    # os.system("pause")
+                    break
+                else:
+                    print("用戶名或密碼出錯,請重新輸入！")
+                    break
         if sc.connect == True:
             break
     menu()

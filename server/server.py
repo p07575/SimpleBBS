@@ -78,11 +78,17 @@ def handle(client):
             global message_from_user
             message_from_user = client.recv(1024).decode("UTF-8")
             if "%0|%0" in message_from_user:
-                message_from_user = message_from_user.split("%0|%0")
+                # print(message_from_user.split("%0|%0"))
+                ms = message_from_user
+                # message_from_user = message_from_user.split("%0|%0")
                 sig = message_from_user[1]
                 message_from_user = rsa.decrypt_data(message_from_user[0])
-                if rsa.rsa_public_check_sign(message_from_user, sig):
-                    message_from_user = message_from_user.split("%0|%0")
+                ms = rsa.decrypt_data(ms)
+                message_from_user = message_from_user.split("%0|%0")
+                with open("tempRsa.pem", "w") as t:
+                    t.write(Rsa[address[0]])
+                # print("\n\n", ms,"\n\n", sig,"\n\n","tempRsa.pem")
+                if rsa.rsa_public_check_sign(ms, sig,"tempRsa.pem"):
                     if login(message_from_user[0],message_from_user[1]):
                         while True:
                             key = sK.GenPasswd2(8,string.digits) + sK.GenPasswd2(15,string.ascii_letters)
@@ -92,12 +98,12 @@ def handle(client):
                         Cli[address[0]]=key
                         # print(message_from_user[2])
                         Keys.append(key)
-                        client.send(f"T/{key}".encode("UTF-8"))
+                        client.send(rsa.encrypt_data(f"T/{key}")+"%0|%0"+rsa.rsa_private_sign(f"T/{key}").encode("UTF-8"))
                     else:
-                        client.send("F".encode("UTF-8"))
+                        client.send(rsa.encrypt_data("F")+"%0|%0"+rsa.rsa_private_sign("F").encode("UTF-8"))
             elif "rsa" in message_from_user:
                 message_from_user = message_from_user.split("rsa/")
-                Rsa[address[0]]=message_from_user[0]
+                Rsa[address[0]]=message_from_user[1]
                 client.send(get_rsa())
             elif "|jasonishandsome|"in message_from_user:
                 message_from_user = message_from_user.split("|jasonishandsome|")
@@ -113,9 +119,10 @@ def handle(client):
         except:
             # Removing And Closing Clients
             clients.remove(client)
-            Keys.remove(Cli[address[0]])
-            del CliKey[Cli[address[0]]]
-            del Cli[address[0]]
+            if address[0] in Cli:
+                Keys.remove(Cli[address[0]])
+                del CliKey[Cli[address[0]]]
+                del Cli[address[0]]
             client.close()
             print(f"{str(address)} left!")
             break

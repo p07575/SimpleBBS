@@ -1,4 +1,4 @@
-## This code appears to be a simple diary application that can connect to a server, write posts, and view posts. The code is written in Python and uses several libraries such as keyboard, time, colorama, socket, and rsa. The application uses RSA encryption and decryption to ensure the security of user data.
+## This is a simple diary application that can connect to a server, write posts, and view posts. The code is written in Python and uses several libraries such as keyboard, time, colorama, socket, and rsa. The application uses RSA encryption and decryption to ensure the security of user data.
 
 ## The code starts by defining a connServer class that is used to keep track of the connection status, host, port, username, password, and session key. The menu() function is used to display the main menu and the different options that the user can choose from.
 

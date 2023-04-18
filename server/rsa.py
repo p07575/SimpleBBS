@@ -22,6 +22,7 @@ def gen_key():
 def get_key(key_file):
     with open(key_file) as f:
         data = f.read()
+        # print(type(data))
         key = RSA.importKey(data)
 
     return key
@@ -48,8 +49,9 @@ def rsa_private_sign(data):
     signature = signature.decode('utf-8')
     return signature
 
-def rsa_public_check_sign(text, sign):
-    publick_key = get_key('rsa_public_key.pem')
+def rsa_public_check_sign(text, sign, key):
+    publick_key = get_key(key)
+    # print(type(publick_key))
     verifier = PKCS1_signature.new(publick_key)
     digest = SHA.new()
     digest.update(text.encode("utf8"))
