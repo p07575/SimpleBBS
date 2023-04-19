@@ -74,17 +74,19 @@ def ConnectServer():
             data = f"{sc.username}|||{sc.password}"
             # print(data)
             # print((rsa.encrypt_data(data)+"|||"+rsa.rsa_private_sign(data)))
-            client.send(("msg|||"+rsa.encrypt_data(data)+"|||"+rsa.rsa_private_sign(data)).encode("UTF-8"))
-            log = client.recv(1024).decode("UTF-8") #Cannot receve data yet
-            # log = log.split("|||")
-            print(log)#[0]+"\n\n\n\n"+log[1])
+            client.send(("login|||"+rsa.encrypt_data(data)+"|||"+rsa.rsa_private_sign(data)).encode("UTF-8"))
+            time.sleep(0.8)
+            log = client.recv(102400) #Cannot receve data yet
+            print(log)
+            log = log.split("|||")
+            #[0]+"\n\n\n\n"+log[1])
             d = rsa.decrypt_data(log[0])
             print(d+"\n\n"+log[0])
             if rsa.rsa_public_check_sign(d,log[1]):
                 log = d
                 if "T" in log:
                     sc.connect = True
-                    sc.sessionKey = log.split("|||")[1]
+                    sc.sessionKey = log.split("/")[1]
                     # print(sc.sessionKey)
                     # os.system("pause")
                     break
@@ -94,11 +96,12 @@ def ConnectServer():
         if sc.connect == True:
             break
     menu()
+    
 
 #定義發送帖子功能
 def post(title,name,content):
     global client
-    post_content=f"upload{title}|||{name}|||{content}|||{sc.sessionKey}"
+    post_content=f"upload|||{title}|||{name}|||{content}|||{sc.sessionKey}"
     client.send(post_content.encode("UTF-8"))
 
 #定義顯示帖子功能

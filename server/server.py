@@ -7,7 +7,7 @@ import rsa
 from datetime import datetime
 
 # Open server.cfg
-with open("server.cfg","r") as i:
+with open("server\\server.cfg","r") as i:
     cfg = json.load(i)
 
 # Connection Data
@@ -77,19 +77,21 @@ def handle(client):
             # Broadcasting Messages
             global message_from_user
             message_from_user = client.recv(1024).decode("UTF-8")
-            if "sign|||" in message_from_user:
-                # print(message_from_user.split("%0|%0"))
-                ms = message_from_user
+            if "login|||" in message_from_user: # User Login
+                print(message_from_user.split())
                 message_from_user = message_from_user.split("|||")
                 sig = message_from_user[2]
-                message_from_user = rsa.decrypt_data(message_from_user[0])
-                ms = rsa.decrypt_data(ms)
+                message_from_user = rsa.decrypt_data(message_from_user[1])
+                # ms = rsa.decrypt_data(ms)
+                ms = message_from_user
                 message_from_user = message_from_user.split("|||")
                 with open("tempRsa.pem", "w") as t:
                     t.write(Rsa[address[0]])
-                # print("\n\n", ms,"\n\n", sig,"\n\n","tempRsa.pem")
-                if rsa.rsa_public_check_sign(ms, sig,"tempRsa.pem"):
+                print("\n\n", ms,"\n\n", sig,"\n\n","tempRsa.pem")
+                if rsa.rsa_public_check_sign(ms, sig,"tempRsa.pem"): # Sign Passed
+                    print("Sign Pass")
                     if login(message_from_user[0],message_from_user[1]):
+                        print("Login Pass")
                         while True:
                             key = sK.GenPasswd2(8,string.digits) + sK.GenPasswd2(15,string.ascii_letters)
                             if key not in Keys:
@@ -98,14 +100,15 @@ def handle(client):
                         Cli[address[0]]=key
                         # print(message_from_user[2])
                         Keys.append(key)
-                        client.send(rsa.encrypt_data(f"T/{key}")+"|||"+rsa.rsa_private_sign(f"T/{key}").encode("UTF-8"))
+                        print("\n\n\n"+rsa.encrypt_data(f"T/{key}")+"|||"+rsa.rsa_private_sign(f"T/{key}").encode("UTF-8"))
+                        client.send((rsa.encrypt_data(f"T/{key}")+"|||"+rsa.rsa_private_sign(f"T/{key}")).encode("UTF-8"))
                     else:
                         client.send(rsa.encrypt_data("F")+"|||"+rsa.rsa_private_sign("F").encode("UTF-8"))
-            elif "rsa" in message_from_user:
-                message_from_user = message_from_user.split("rsa/")
+            elif "sign" in message_from_user: # Exchange Keys
+                message_from_user = message_from_user.split("sign|||")
                 Rsa[address[0]]=message_from_user[1]
                 client.send(get_rsa())
-            elif "upload"in message_from_user:
+            elif "upload"in message_from_user: # Upload the post to the server
                 message_from_user = message_from_user.split("|||")
                 if CliKey[message_from_user[3]][0] == message_from_user[1]:
                     save_posts(message_from_user[0],message_from_user[1],message_from_user[2])
