@@ -1,1 +1,3 @@
 *.pem
+client/*.pem
+server/*.pem
