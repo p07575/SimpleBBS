@@ -77,14 +77,14 @@ def handle(client):
             # Broadcasting Messages
             global message_from_user
             message_from_user = client.recv(1024).decode("UTF-8")
-            if "%0|%0" in message_from_user:
+            if "sign|||" in message_from_user:
                 # print(message_from_user.split("%0|%0"))
                 ms = message_from_user
-                # message_from_user = message_from_user.split("%0|%0")
-                sig = message_from_user[1]
+                message_from_user = message_from_user.split("|||")
+                sig = message_from_user[2]
                 message_from_user = rsa.decrypt_data(message_from_user[0])
                 ms = rsa.decrypt_data(ms)
-                message_from_user = message_from_user.split("%0|%0")
+                message_from_user = message_from_user.split("|||")
                 with open("tempRsa.pem", "w") as t:
                     t.write(Rsa[address[0]])
                 # print("\n\n", ms,"\n\n", sig,"\n\n","tempRsa.pem")
@@ -98,19 +98,19 @@ def handle(client):
                         Cli[address[0]]=key
                         # print(message_from_user[2])
                         Keys.append(key)
-                        client.send(rsa.encrypt_data(f"T/{key}")+"%0|%0"+rsa.rsa_private_sign(f"T/{key}").encode("UTF-8"))
+                        client.send(rsa.encrypt_data(f"T/{key}")+"|||"+rsa.rsa_private_sign(f"T/{key}").encode("UTF-8"))
                     else:
-                        client.send(rsa.encrypt_data("F")+"%0|%0"+rsa.rsa_private_sign("F").encode("UTF-8"))
+                        client.send(rsa.encrypt_data("F")+"|||"+rsa.rsa_private_sign("F").encode("UTF-8"))
             elif "rsa" in message_from_user:
                 message_from_user = message_from_user.split("rsa/")
                 Rsa[address[0]]=message_from_user[1]
                 client.send(get_rsa())
-            elif "|jasonishandsome|"in message_from_user:
-                message_from_user = message_from_user.split("|jasonishandsome|")
+            elif "upload"in message_from_user:
+                message_from_user = message_from_user.split("|||")
                 if CliKey[message_from_user[3]][0] == message_from_user[1]:
                     save_posts(message_from_user[0],message_from_user[1],message_from_user[2])
             elif "get" in message_from_user:
-                message_from_user = message_from_user.split("/uSB/")
+                message_from_user = message_from_user.split("|||")
                 # print(f"{CliKey[message_from_user[2]][0]} / {message_from_user[1]} is using function get_post.")
                 if CliKey[message_from_user[2]][0] == message_from_user[1]:
                     # print("True")

@@ -67,16 +67,16 @@ def ConnectServer():
                 break
             sc.username = input("請輸入用戶名>>> ")
             sc.password = input("請輸入密碼>>> ")
-            client.send(f"rsa/{get_rsa()}".encode("UTF-8"))
+            client.send(f"sign|||{get_rsa()}".encode("UTF-8"))
             rs = client.recv(1024000)
             with open ("rsa_public_key.pem", "wb") as r:
                 r.write(rs)
-            data = f"{sc.username}%0|%0{sc.password}"
+            data = f"{sc.username}|||{sc.password}"
             # print(data)
-            # print((rsa.encrypt_data(data)+"%0|%0"+rsa.rsa_private_sign(data)))
-            client.send((rsa.encrypt_data(data)+"%0|%0"+rsa.rsa_private_sign(data)).encode("UTF-8"))
+            # print((rsa.encrypt_data(data)+"|||"+rsa.rsa_private_sign(data)))
+            client.send(("msg|||"+rsa.encrypt_data(data)+"|||"+rsa.rsa_private_sign(data)).encode("UTF-8"))
             log = client.recv(1024).decode("UTF-8") #Cannot receve data yet
-            # log = log.split("%0|%0")
+            # log = log.split("|||")
             print(log)#[0]+"\n\n\n\n"+log[1])
             d = rsa.decrypt_data(log[0])
             print(d+"\n\n"+log[0])
@@ -84,7 +84,7 @@ def ConnectServer():
                 log = d
                 if "T" in log:
                     sc.connect = True
-                    sc.sessionKey = log.split("/")[1]
+                    sc.sessionKey = log.split("|||")[1]
                     # print(sc.sessionKey)
                     # os.system("pause")
                     break
@@ -98,7 +98,7 @@ def ConnectServer():
 #定義發送帖子功能
 def post(title,name,content):
     global client
-    post_content=f"{title}|jasonishandsome|{name}|jasonishandsome|{content}|jasonishandsome|{sc.sessionKey}"
+    post_content=f"upload{title}|||{name}|||{content}|||{sc.sessionKey}"
     client.send(post_content.encode("UTF-8"))
 
 #定義顯示帖子功能
@@ -106,7 +106,7 @@ def get_post(name):
     if sc.connect == True:
         global client
         os.system("cls")
-        client.send(f"get/uSB/{name}/uSB/{sc.sessionKey}".encode("UTF-8"))
+        client.send(f"get|||{name}|||{sc.sessionKey}".encode("UTF-8"))
         message = client.recv(1024000).decode("UTF-8")
         print(message)
         os.system("pause")
