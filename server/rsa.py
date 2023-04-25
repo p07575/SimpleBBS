@@ -27,8 +27,8 @@ def get_key(key_file):
 
     return key
 
-def encrypt_data(msg):
-    public_key = get_key('rsa_public_key.pem')
+def encrypt_data(msg,key):
+    public_key = get_key(key)
     cipher = PKCS1_cipher.new(public_key)
     encrypt_text = base64.b64encode(cipher.encrypt(bytes(msg.encode("utf8"))))
     return encrypt_text.decode('utf-8')

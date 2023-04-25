@@ -76,7 +76,7 @@ def ConnectServer():
             # print((rsa.encrypt_data(data)+"|||"+rsa.rsa_private_sign(data)))
             client.send(("login|||"+rsa.encrypt_data(data)+"|||"+rsa.rsa_private_sign(data)).encode("UTF-8"))
             time.sleep(0.8)
-            log = client.recv(102400) #Cannot receve data yet
+            log = client.recv(10240000).decode("utf-8") #Cannot receve data yet
             print(log)
             log = log.split("|||")
             #[0]+"\n\n\n\n"+log[1])
@@ -109,7 +109,8 @@ def get_post(name):
     if sc.connect == True:
         global client
         os.system("cls")
-        client.send(f"get|||{name}|||{sc.sessionKey}".encode("UTF-8"))
+        data = f"get|||{name}|||{sc.sessionKey}".encode("UTF-8")
+        client.send(rsa.encrypt(data)+"|||"+rsa.rsa_private_sign(data))# Receive code not written on server.py yet! 
         message = client.recv(1024000).decode("UTF-8")
         print(message)
         os.system("pause")

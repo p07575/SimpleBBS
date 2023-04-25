@@ -7,7 +7,7 @@ import rsa
 from datetime import datetime
 
 # Open server.cfg
-with open("server\\server.cfg","r") as i:
+with open("server.cfg","r") as i:
     cfg = json.load(i)
 
 # Connection Data
@@ -77,6 +77,7 @@ def handle(client):
             # Broadcasting Messages
             global message_from_user
             message_from_user = client.recv(1024).decode("UTF-8")
+            print("Debug Mode On")
             if "login|||" in message_from_user: # User Login
                 print(message_from_user.split())
                 message_from_user = message_from_user.split("|||")
@@ -87,7 +88,7 @@ def handle(client):
                 message_from_user = message_from_user.split("|||")
                 with open("tempRsa.pem", "w") as t:
                     t.write(Rsa[address[0]])
-                print("\n\n", ms,"\n\n", sig,"\n\n","tempRsa.pem")
+                print("\n\n"+ms+"\n\n"+sig+"\n\n"+"tempRsa.pem")
                 if rsa.rsa_public_check_sign(ms, sig,"tempRsa.pem"): # Sign Passed
                     print("Sign Pass")
                     if login(message_from_user[0],message_from_user[1]):
@@ -96,14 +97,22 @@ def handle(client):
                             key = sK.GenPasswd2(8,string.digits) + sK.GenPasswd2(15,string.ascii_letters)
                             if key not in Keys:
                                 break
-                        CliKey[key]=[message_from_user[0],address[0]]
-                        Cli[address[0]]=key
-                        # print(message_from_user[2])
                         Keys.append(key)
-                        print("\n\n\n"+rsa.encrypt_data(f"T/{key}")+"|||"+rsa.rsa_private_sign(f"T/{key}").encode("UTF-8"))
-                        client.send((rsa.encrypt_data(f"T/{key}")+"|||"+rsa.rsa_private_sign(f"T/{key}")).encode("UTF-8"))
+                        print("\n"+"key:"+key+"\n")
+                        CliKey[key]=[message_from_user[0],address[0]]
+                        print(message_from_user[0]+"\n"+address[0])
+                        Cli[address[0]]=key
+                        print("Key is saved to varible"+"\n\n")
+                        try:print(rsa.encrypt_data(f"T/{key}","tempRsa.pem")+"|||"+rsa.rsa_private_sign(f"T/{key}"))
+                        except Exception as e:
+                            print(e)
+                            print("data encrypt failed")
+                        # print(message_from_user[2])
+                        # print()
+                        client.send((rsa.encrypt_data(f"T/{key}","tempRsa.pem")+"|||"+rsa.rsa_private_sign(f"T/{key}")).encode("UTF-8"))
+                        print(f"\nUser {message_from_user[0]} Logined to the Server")
                     else:
-                        client.send(rsa.encrypt_data("F")+"|||"+rsa.rsa_private_sign("F").encode("UTF-8"))
+                        client.send(rsa.encrypt_data("F","tempRsa.pem")+"|||"+rsa.rsa_private_sign("F").encode("UTF-8"))
             elif "sign" in message_from_user: # Exchange Keys
                 message_from_user = message_from_user.split("sign|||")
                 Rsa[address[0]]=message_from_user[1]
