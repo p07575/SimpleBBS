@@ -117,11 +117,11 @@ def handle(client):
                 message_from_user = message_from_user.split("sign|||")
                 Rsa[address[0]]=message_from_user[1]
                 client.send(get_rsa())
-            elif "upload"in message_from_user: # Upload the post to the server
+            elif "upload"in message_from_user: # Upload the post to the server *Needs Rsa
                 message_from_user = message_from_user.split("|||")
                 if CliKey[message_from_user[3]][0] == message_from_user[1]:
                     save_posts(message_from_user[0],message_from_user[1],message_from_user[2])
-            elif "get" in message_from_user:
+            elif "get" in message_from_user: # *Needs Rsa
                 message_from_user = message_from_user.split("|||")
                 # print(f"{CliKey[message_from_user[2]][0]} / {message_from_user[1]} is using function get_post.")
                 if CliKey[message_from_user[2]][0] == message_from_user[1]:
@@ -161,3 +161,8 @@ rsa.gen_key()
 check()
 
 receive()
+
+"""
+Problem 1: HUGE BUG
+When user gets session key, he/she can get other account's data without a password.
+"""
