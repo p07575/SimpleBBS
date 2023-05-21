@@ -51,7 +51,7 @@ def rsa_private_sign(data):
 
 def rsa_public_check_sign(text, sign, key):
     publick_key = get_key(key)
-    # print(type(publick_key))
+    # print(type(public_key))
     verifier = PKCS1_signature.new(publick_key)
     digest = SHA.new()
     digest.update(text.encode("utf8"))

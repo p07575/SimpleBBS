@@ -94,14 +94,14 @@ def handle(client):
                     if login(message_from_user[0],message_from_user[1]):
                         print("Login Pass")
                         while True:
-                            key = sK.GenPasswd2(8,string.digits) + sK.GenPasswd2(15,string.ascii_letters)
+                            key = sK.GenPasswd2(8,string.digits) + sK.GenPasswd2(15,string.ascii_letters) # Gen Session Key
                             if key not in Keys:
                                 break
-                        Keys.append(key)
+                        Keys.append(key) # Session Keys stored in Keys
                         print("\n"+"key:"+key+"\n")
-                        CliKey[key]=[message_from_user[0],address[0]]
+                        CliKey[key]=[message_from_user[0],address[0]] # CliKey[key]=[username, password]
                         print(message_from_user[0]+"\n"+address[0])
-                        Cli[address[0]]=key
+                        Cli[address[0]]=key # Cli[password]=key
                         print("Key is saved to varible"+"\n\n")
                         try:print(rsa.encrypt_data(f"T/{key}","tempRsa.pem")+"|||"+rsa.rsa_private_sign(f"T/{key}"))
                         except Exception as e:
@@ -117,16 +117,33 @@ def handle(client):
                 message_from_user = message_from_user.split("sign|||")
                 Rsa[address[0]]=message_from_user[1]
                 client.send(get_rsa())
-            elif "upload"in message_from_user: # Upload the post to the server *Needs Rsa
+            elif "upload"in message_from_user: # Upload the post to the server *Needs Rsa 
+                with open("tempRsa.pem", "w") as t:
+                    t.write(Rsa[address[0]])
                 message_from_user = message_from_user.split("|||")
-                if CliKey[message_from_user[3]][0] == message_from_user[1]:
-                    save_posts(message_from_user[0],message_from_user[1],message_from_user[2])
+                sign = message_from_user[2]
+                message_from_user=rsa.decrypt(message_from_user[1])
+                print(f"Message from {}{message_from_user}")
+                print("Checking Sign")
+                if rsa.rsa_public_check_sign(message_from_user, sign,"tempRsa.pem"):
+                    print("Login Pass")
+                    message_from_user = message_from_user.split("|||")
+                    if CliKey[message_from_user[3]][0] == message_from_user[1]:
+                        save_posts(message_from_user[0],message_from_user[1],message_from_user[2])
             elif "get" in message_from_user: # *Needs Rsa
+                with open("tempRsa.pem", "w") as t:
+                    t.write(Rsa[address[0]])
                 message_from_user = message_from_user.split("|||")
+                sign=message_from_user[1]
+                message_from_user=rsa.decrypt(message_from_user[0])
                 # print(f"{CliKey[message_from_user[2]][0]} / {message_from_user[1]} is using function get_post.")
-                if CliKey[message_from_user[2]][0] == message_from_user[1]:
-                    # print("True")
-                    send_data(get_posts(message_from_user[1]),client)
+                print("Checking Sign")
+                if rsa.rsa_public_check_sign(message_from_user, sign,"tempRsa.pem"):
+                    print("Login Pass")
+                    message_from_user = message_from_user.split("|||")
+                    if CliKey[message_from_user[2]][0] == message_from_user[1]:
+                        # print("True")
+                        send_data(get_posts(message_from_user[1]),client)
 
         except:
             # Removing And Closing Clients
@@ -165,4 +182,5 @@ receive()
 """
 Problem 1: HUGE BUG
 When user gets session key, he/she can get other account's data without a password.
+Statues: Mis-found, Not a real bug
 """
