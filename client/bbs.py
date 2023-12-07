@@ -101,8 +101,8 @@ def ConnectServer():
 #定義發送帖子功能
 def post(title,name,content):
     global client
-    encryptedData=rsa.encrypt_data(f"upload|||{title}|||{name}|||{content}|||{sc.sessionKey}")
-    post_content=f"upload|||{encryptedData}|||{rsa.rsa_private_sign(encryptedData)}"
+    Data=f"upload|||{title}|||{name}|||{content}|||{sc.sessionKey}"
+    post_content=f"upload|||{rsa.encrypt_data(Data)}|||{rsa.rsa_private_sign(Data)}"
     client.send(post_content.encode("UTF-8"))
 
 #定義顯示帖子功能
@@ -111,7 +111,7 @@ def get_post(name):
         global client
         os.system("cls")
         data = f"get|||{name}|||{sc.sessionKey}"
-        client.send((rsa.encrypt_data(data)+"|||"+rsa.rsa_private_sign(data)).encode("UTF-8"))# Receive code not written on server.py yet! 
+        client.send(("get"+"|||"+rsa.encrypt_data(data)+"|||"+rsa.rsa_private_sign(data)).encode("UTF-8"))# Receive code not written on server.py yet! 
         message = client.recv(1024000).decode("UTF-8")
         print(message)
         os.system("pause")

@@ -122,28 +122,41 @@ def handle(client):
                     t.write(Rsa[address[0]])
                 message_from_user = message_from_user.split("|||")
                 sign = message_from_user[2]
-                message_from_user=rsa.decrypt(message_from_user[1])
-                print(f"Message from {}{message_from_user}")
+                mu=rsa.decrypt_data(message_from_user[1])
+                message_from_user=rsa.decrypt_data(message_from_user[1]).split("|||")
+                print(f"Message from {message_from_user[2]}")
                 print("Checking Sign")
-                if rsa.rsa_public_check_sign(message_from_user, sign,"tempRsa.pem"):
-                    print("Login Pass")
-                    message_from_user = message_from_user.split("|||")
-                    if CliKey[message_from_user[3]][0] == message_from_user[1]:
-                        save_posts(message_from_user[0],message_from_user[1],message_from_user[2])
+                print(sign)
+                if rsa.rsa_public_check_sign(mu, sign,"tempRsa.pem"):
+                    print("Login Pass\n")
+                    print(message_from_user)
+                    print()
+                    print(CliKey)
+                    if CliKey[message_from_user[4]][0] == message_from_user[2]:
+                        save_posts(message_from_user[1],message_from_user[2],message_from_user[3])
             elif "get" in message_from_user: # *Needs Rsa
+                print("Client request to get posts.")
                 with open("tempRsa.pem", "w") as t:
                     t.write(Rsa[address[0]])
                 message_from_user = message_from_user.split("|||")
-                sign=message_from_user[1]
-                message_from_user=rsa.decrypt(message_from_user[0])
+                print(message_from_user)
+                sign=message_from_user[2]
+                print()
+                print(sign)
+                try:
+                    message_from_user=rsa.decrypt_data(message_from_user[1])
+                except Exception as e:
+                    print(e)
                 # print(f"{CliKey[message_from_user[2]][0]} / {message_from_user[1]} is using function get_post.")
                 print("Checking Sign")
                 if rsa.rsa_public_check_sign(message_from_user, sign,"tempRsa.pem"):
                     print("Login Pass")
+                    print(message_from_user)
                     message_from_user = message_from_user.split("|||")
                     if CliKey[message_from_user[2]][0] == message_from_user[1]:
-                        # print("True")
+                        print("True")
                         send_data(get_posts(message_from_user[1]),client)
+                else: print("Check Sign Failed")
 
         except:
             # Removing And Closing Clients
@@ -182,5 +195,11 @@ receive()
 """
 Problem 1: HUGE BUG
 When user gets session key, he/she can get other account's data without a password.
-Statues: Mis-found, Not a real bug
+Status: Mis-found, Not a real bug
+"""
+
+"""
+To Do list:
+* Add RSA encrypt to the data from the server to the client, for get and post function.
+  Status: Not even started yet... 
 """
