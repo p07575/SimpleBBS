@@ -155,7 +155,13 @@ def handle(client):
                     message_from_user = message_from_user.split("|||")
                     if CliKey[message_from_user[2]][0] == message_from_user[1]:
                         print("True")
-                        send_data(get_posts(message_from_user[1]),client)
+                        st = get_posts(message_from_user[1])
+                        # try:
+                        #     print(st)
+                        #     st = rsa.rsa_encrypt(st) +"|||"#+ rsa.rsa_private_sign(st)
+                        # except Exception as e:
+                        #     print(e)
+                        send_data(st,client)
                 else: print("Check Sign Failed")
 
         except:

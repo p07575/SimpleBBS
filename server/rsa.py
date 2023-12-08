@@ -56,3 +56,47 @@ def rsa_public_check_sign(text, sign, key):
     digest = SHA.new()
     digest.update(text.encode("utf8"))
     return verifier.verify(digest, base64.b64decode(sign))
+
+#加密
+def rsa_encrypt(data,length=50):
+    #导入公钥
+    with open('tempRsa.pem') as f:
+        # 拼接公钥的前后缀
+        #key = '-----BEGIN RSA PRIVATE KEY-----\n' + f.read() + '\n-----END RSA PRIVATE KEY-----'
+        key = f.read()
+        # print(key)
+        # 使用 RSA 的 importKey() 方法对(从文件中读取的)公钥字符串进行处理，处理成可用的加密公钥。
+        pub_key = RSA.importKey(str(key))
+        # 实例化一个加密对象 cipher ，传入的参数是公钥，通过 cipher 的 encrypt() 方法对信息进行加密。
+        cipher = PKCS1_cipher.new(pub_key)
+    # 对传入的数据data进行编码，
+    data = data.encode()
+    if len(data) <= length:
+        # 对编码的数据进行加密，并通过base64进行编码
+        result = base64.b64encode(cipher.encrypt(data))
+    else :
+        rsa_text = []
+        # 对编码后的数据进行切片，原因：加密长度不能过长
+        for i in range(0, len(data), length):
+            cont = data[i:i + length]
+            # 对切片后的数据进行加密，并新增到text后面
+            rsa_text.append(cipher.encrypt(data))
+        # 加密完进行拼接
+        cipher_text = b''.join(rsa_text)
+        # base64进行编码
+        result = base64.b64encode(cipher_text)
+    return result.decode()
+ 
+#解密
+def rsa_decrypt(data):
+    with open('rsa_private_key.pem') as f:
+        key = f.read()
+        # 使用 RSA 的 importKey() 方法对(从文件中读取的)私钥字符串进行处理，处理成可用的加密公钥。
+        pub_key = RSA.importKey(str(key))
+        # 实例化一个加密对象 cipher ，传入的参数是私钥，通过 cipher 的 encrypt() 方法对信息进行加密。
+        cipher = PKCS1_cipher.new(pub_key)
+    # 对传入的数据data进行解码
+    data=base64.b64decode(data)
+    #解密
+    result = cipher.decrypt(data,0)
+    return result.decode('utf-8')
