@@ -4,6 +4,7 @@ import json
 import sessionKey as sK
 import string
 import rsa
+import time
 from datetime import datetime
 
 # Open server.cfg
@@ -191,6 +192,8 @@ def receive():
         thread.start()
 
         # print(clients,"\n",CliKey,"\n",Cli,"\n",Keys,"\n","\n")
+
+        time.sleep(0.001)
 
 rsa.gen_key()
 
